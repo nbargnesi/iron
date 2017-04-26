@@ -30,6 +30,7 @@ import "bufio"
 import "path"
 import "regexp"
 import "strings"
+import "runtime/debug"
 
 var esc = ""
 
@@ -52,6 +53,7 @@ func die() {
 
 func panicNonNil(e error) {
 	if e != nil {
+		debug.PrintStack()
 		panic(e)
 	}
 }

@@ -24,11 +24,11 @@
 //
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os/exec"
-)
+import "bufio"
+import "fmt"
+import "sync"
+import "os/exec"
+import "github.com/fatih/color"
 
 func feExec(stanza ScriptStanza) {
 	name := fmt.Sprintf("%s", stanza.ScriptPath)
@@ -46,17 +46,28 @@ func feExec(stanza ScriptStanza) {
 		die()
 	}
 
+	stdout := color.New(color.FgBlue)
+	stderr := color.New(color.FgYellow)
+	var mutex = &sync.Mutex{}
+
+
 	outScanner := bufio.NewScanner(outpipe)
 	go func() {
 		for outScanner.Scan() {
-			outputChan <- outScanner.Text()
+			mutex.Lock()
+			text := stdout.Sprintf("%s", outScanner.Text())
+			outputChan <- text
+			mutex.Unlock()
 		}
 	}()
 
 	errScanner := bufio.NewScanner(errpipe)
 	go func() {
 		for errScanner.Scan() {
-			outputChan <- errScanner.Text()
+			mutex.Lock()
+			text := stderr.Sprintf("%s", errScanner.Text())
+			outputChan <- text
+			mutex.Unlock()
 		}
 	}()
 

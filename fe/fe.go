@@ -364,6 +364,9 @@ func main() {
 	checkVersion(keyVals)
 	prompt := getPrompt(keyVals)
 	scriptLoc := getScriptLoc(keyVals)
+	// convert to absolute path
+	scriptLoc, err = filepath.Abs(scriptLoc)
+	panicNonNil(err)
 	scripts := collectScripts(scriptLoc)
 	if len(scripts) == 0 {
 		fmt.Fprintf(os.Stderr, "No scripts found.\n")
@@ -398,9 +401,7 @@ func main() {
 		EOFPrompt:         "exit",
 		HistorySearchFold: true,
 	})
-	if err != nil {
-		panic(err)
-	}
+	panicNonNil(err)
 	defer l.Close()
 
 	for {
